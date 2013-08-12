@@ -14,6 +14,8 @@ sys.setdefaultencoding('utf-8')
 import urllib2, socket, time
 import re, random, types
 
+import time
+
 from bs4 import BeautifulSoup 
 
 base_url = 'https://www.google.com.hk/'
@@ -66,9 +68,10 @@ class SearchResult:
     def writeFile(self, filename):
         file = open(filename, 'a')
         try:
-            file.write('url:' + self.url+ '\n')
-            file.write('title:' + self.title + '\n')
-            file.write('content:' + self.content + '\n\n')
+            # file.write('url:' + self.url+ '\n')
+            # file.write('title:' + self.title + '\n')
+            # file.write('content:' + self.content + '\n\n')
+            file.write(self.url+'\n')
 
         except IOError, e:
             print 'file error:', e
@@ -133,10 +136,10 @@ class GoogleAPI:
     # @param query -> query key words 
     # @param lang -> language of search results  
     # @param num -> number of search results to return 
-    def search(self, query, lang='en', num=10):
+    def search(self, query, start,lang='en', num=100):
         query = urllib2.quote(query)
         search_results = list()
-        url = '%s/search?hl=%s&num=%d&q=%s' % (base_url, lang, num, query)
+        url = '%s/search?hl=%s&num=%d&q=%s&filter=0&start=%d' % (base_url, lang, num, query, start)
         str = ''
         retry = 3
         while(retry > 0):
@@ -170,9 +173,13 @@ def test():
         return
     query = sys.argv[1]
     api = GoogleAPI()
-    result = api.search(query)
-    for r in result:
-        r.printIt()
+    for i in range(0,9):
+        result = api.search(query,i*100)
+        for r in result:
+            r.printIt()
+            r.writeFile('url.txt')
+        time.sleep(10)
+        
 
 if __name__ == '__main__':
     test()
