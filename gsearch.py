@@ -14,11 +14,11 @@ sys.setdefaultencoding('utf-8')
 import urllib2, socket, time
 import re, random, types
 
-import time
+
 
 from bs4 import BeautifulSoup 
 
-base_url = 'https://www.google.com.hk/'
+base_url = 'https://www.google.com.hk'
 
 user_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20130406 Firefox/23.0', \
         'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0', \
@@ -85,7 +85,7 @@ class GoogleAPI:
         socket.setdefaulttimeout(timeout)
 
     def randomSleep(self):
-        sleeptime =  random.randint(60, 120)
+        sleeptime =  random.randint(10, 60)
         time.sleep(sleeptime)
 
     #extract the domain of a url
@@ -102,6 +102,7 @@ class GoogleAPI:
     def extractSearchResults(self, html):
         results = list()
         soup = BeautifulSoup(html)
+       # print html
         div = soup.find('div', id  = 'search')
         if (type(div) != types.NoneType):
             lis = div.findAll('li', {'class': 'g'})
@@ -118,7 +119,7 @@ class GoogleAPI:
                         continue
 
                     url = link['href']
-                    url = self.extractDomain(url)
+                    #url = self.extractDomain(url)
                     if(cmp(url, '') == 0):
                         continue
                     title = link.renderContents()
@@ -145,13 +146,17 @@ class GoogleAPI:
         while(retry > 0):
             try:
                 request = urllib2.Request(url)
+                print url
                 length = len(user_agents)
                 index = random.randint(0, length-1)
-                user_agent = user_agents[index] 
+                user_agent = user_agents[1]
+                print user_agent
                 request.add_header('User-agent', user_agent)
+                print 123
                 request.add_header('connection','keep-alive')
+                print 456
                 response = urllib2.urlopen(request)
-                html = response.read() 
+                html = response.read()
                 results = self.extractSearchResults(html)
                 return results
             except urllib2.URLError,e:
@@ -175,10 +180,12 @@ def test():
     api = GoogleAPI()
     for i in range(0,9):
         result = api.search(query,i*100)
+        print 'i am here'
+        #print result
         for r in result:
             r.printIt()
             r.writeFile('url.txt')
-        time.sleep(10)
+        api.randomSleep()
         
 
 if __name__ == '__main__':
